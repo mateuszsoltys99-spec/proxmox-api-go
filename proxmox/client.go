@@ -2487,6 +2487,18 @@ func (c *Client) CreateNodeFirewallRule(ctx context.Context, node string, params
 	return nil
 }
 
+// Updates a firewall rule on a node
+func (c *Client) UpdateNodeFirewallRule(ctx context.Context, node string, pos int, params map[string]interface{}) error {
+	if c == nil {
+		return errors.New(Client_Error_Nil)
+	}
+	err := c.Put(ctx, params, fmt.Sprintf("/nodes/%s/firewall/rules/%d", node, pos))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Deletes a specific firewall wall on a node
 func (c *Client) DeleteNodeFirewallRule(ctx context.Context, node string, pos int) error {
 	if c == nil {

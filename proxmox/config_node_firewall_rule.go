@@ -65,6 +65,10 @@ func (nodeFirewallRule *NodeFirewallRule) CreateFirewallRule(ctx context.Context
 	return client.CreateNodeFirewallRule(ctx, node, nodeFirewallRuleToMap(*nodeFirewallRule))
 }
 
+func (nodeFirewallRule *NodeFirewallRule) UpdateFirewallRule(ctx context.Context, node string, client *Client) error {
+	return client.UpdateNodeFirewallRule(ctx, node, nodeFirewallRule.Pos, nodeFirewallRuleToMap(*nodeFirewallRule))
+}
+
 func mapToNodeFirewallRule(input map[string]interface{}) *NodeFirewallRule {
 	proto := ""
 	if _, isSet := input["proto"]; isSet {

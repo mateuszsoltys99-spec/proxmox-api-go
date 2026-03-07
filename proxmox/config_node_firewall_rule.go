@@ -57,16 +57,16 @@ func ReadAllFirewallRulesFromAPICall(ctx context.Context, node string, client *C
 	return rules, nil
 }
 
-func (nodeFirewallRule *NodeFirewallRule) DeleteFirewallRule(ctx context.Context, node string, client *Client) error {
+func (nodeFirewallRule NodeFirewallRule) DeleteFirewallRule(ctx context.Context, node string, client *Client) error {
 	return client.DeleteNodeFirewallRule(ctx, node, nodeFirewallRule.Pos)
 }
 
-func (nodeFirewallRule *NodeFirewallRule) CreateFirewallRule(ctx context.Context, node string, client *Client) error {
-	return client.CreateNodeFirewallRule(ctx, node, nodeFirewallRuleToMap(*nodeFirewallRule))
+func (nodeFirewallRule NodeFirewallRule) CreateFirewallRule(ctx context.Context, node string, client *Client) error {
+	return client.CreateNodeFirewallRule(ctx, node, nodeFirewallRule.mapToApiValues())
 }
 
-func (nodeFirewallRule *NodeFirewallRule) UpdateFirewallRule(ctx context.Context, node string, client *Client) error {
-	return client.UpdateNodeFirewallRule(ctx, node, nodeFirewallRule.Pos, nodeFirewallRuleToMap(*nodeFirewallRule))
+func (nodeFirewallRule NodeFirewallRule) UpdateFirewallRule(ctx context.Context, node string, client *Client) error {
+	return client.UpdateNodeFirewallRule(ctx, node, nodeFirewallRule.Pos, nodeFirewallRule.mapToApiValues())
 }
 
 func mapToNodeFirewallRule(input map[string]interface{}) *NodeFirewallRule {
@@ -119,24 +119,9 @@ func mapToNodeFirewallRule(input map[string]interface{}) *NodeFirewallRule {
 	}
 }
 
-func nodeFirewallRuleToMap(rule NodeFirewallRule) map[string]interface{} {
-	result := make(map[string]interface{})
-	result["proto"] = rule.Proto
-	result["type"] = rule.Type
-	result["pos"] = rule.Pos
-	result["action"] = rule.Action
-	if rule.Sport != "" {
-		result["sport"] = rule.Sport
-	}
-	if rule.Digest != "" {
-		result["digest"] = rule.Digest
-	}
-	if rule.Log != "" {
-		result["log"] = rule.Log
-	}
-	if rule.Dport != "" {
-		result["dport"] = rule.Dport
-	}
-	result["enable"] = rule.Enable
+func (nodeFirewallRule NodeFirewallRule) mapToApiValues() map[string]interface{} {
+	data, _ := json.Marshal(&nodeFirewallRule)
+	var result map[string]interface{}
+	_ = json.Unmarshal(data, &result)
 	return result
 }

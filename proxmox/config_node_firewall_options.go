@@ -49,8 +49,8 @@ func NewNodeFirewallOptionsFromAPICall(ctx context.Context, node string, client 
 	return mapToNodeFirewallOptions(retrievedFirewallRule), nil
 }
 
-func (nodeFirewallOptions *NodeFirewallOptions) UpdateNodeFirewallOptions(ctx context.Context, node string, client *Client) error {
-	return client.UpdateNodeFirewallOptions(ctx, node, nodeFirewallOptionsToMap(*nodeFirewallOptions))
+func (nodeFirewallOptions NodeFirewallOptions) UpdateNodeFirewallOptions(ctx context.Context, node string, client *Client) error {
+	return client.UpdateNodeFirewallOptions(ctx, node, nodeFirewallOptions.mapToApiValues())
 }
 
 func getString(m map[string]interface{}, key string) string {
@@ -107,41 +107,9 @@ func mapToNodeFirewallOptions(input map[string]interface{}) *NodeFirewallOptions
 	}
 }
 
-func nodeFirewallOptionsToMap(opts NodeFirewallOptions) map[string]interface{} {
-	result := make(map[string]interface{})
-
-	result["enable"] = opts.Enable
-	result["log_nf_conntrack"] = opts.LogNfConntrack
-	result["ndp"] = opts.Ndp
-	result["nf_conntrack_allow_invalid"] = opts.NfConntrackAllowInvalid
-	result["nf_conntrack_max"] = opts.NfConntrackMax
-	result["nf_conntrack_tcp_timeout_established"] = opts.NfConntrackTcpTimeoutEstablished
-	result["nf_conntrack_tcp_timeout_syn_recv"] = opts.NfConntrackTcpTimeoutSynRecv
-	result["nftables"] = opts.Nftables
-	result["nosmurfs"] = opts.Nosmurfs
-	result["protection_synflood"] = opts.ProtectionSynflood
-	result["protection_synflood_burst"] = opts.ProtectionSynfloodBurst
-	result["protection_synflood_rate"] = opts.ProtectionSynfloodRate
-	result["tcpflags"] = opts.Tcpflags
-
-	if opts.LogLevelForward != "" {
-		result["log_level_forward"] = opts.LogLevelForward
-	}
-	if opts.LogLevelIn != "" {
-		result["log_level_in"] = opts.LogLevelIn
-	}
-	if opts.LogLevelOut != "" {
-		result["log_level_out"] = opts.LogLevelOut
-	}
-	if opts.NfConntrackHelpers != "" {
-		result["nf_conntrack_helpers"] = opts.NfConntrackHelpers
-	}
-	if opts.SmurfLogLevel != "" {
-		result["smurf_log_level"] = opts.SmurfLogLevel
-	}
-	if opts.TcpFlagsLogLevel != "" {
-		result["tcp_flags_log_level"] = opts.TcpFlagsLogLevel
-	}
-
+func (nodeFirewallOptions NodeFirewallOptions) mapToApiValues() map[string]interface{} {
+	data, _ := json.Marshal(&nodeFirewallOptions)
+	var result map[string]interface{}
+	_ = json.Unmarshal(data, &result)
 	return result
 }

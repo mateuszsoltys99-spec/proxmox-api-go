@@ -3,6 +3,8 @@ package proxmox
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 )
 
@@ -42,15 +44,28 @@ func NewNodeFirewallOptionsFromJson(input []byte) (firewallOptions NodeFirewallO
 }
 
 func NewNodeFirewallOptionsFromAPICall(ctx context.Context, node string, client *Client) (firewallOptions *NodeFirewallOptions, err error) {
-	retrievedFirewallRule, err := client.ReadNodeFirewallOptions(ctx, node)
+	if client == nil {
+		return nil, errors.New(Client_Error_Nil)
+	}
+	rules, err := client.GetItemConfigMapStringInterface(ctx,
+		fmt.Sprintf("/nodes/%s/firewall/options", node),
+		"node firewall",
+		fmt.Sprintf("options for node: %s", node))
 	if err != nil {
 		return nil, err
 	}
-	return mapToNodeFirewallOptions(retrievedFirewallRule), nil
+	return mapToNodeFirewallOptions(rules), nil
 }
 
 func (nodeFirewallOptions NodeFirewallOptions) UpdateNodeFirewallOptions(ctx context.Context, node string, client *Client) error {
-	return client.UpdateNodeFirewallOptions(ctx, node, nodeFirewallOptions.mapToApiValues())
+	if client == nil {
+		return errors.New(Client_Error_Nil)
+	}
+	err := client.Put(ctx, nodeFirewallOptions.mapToApiValues(), fmt.Sprintf("/nodes/%s/firewall/options", node))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getString(m map[string]interface{}, key string) string {

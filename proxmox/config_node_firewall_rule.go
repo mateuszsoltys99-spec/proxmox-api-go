@@ -3,6 +3,8 @@ package proxmox
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 )
 
@@ -35,7 +37,7 @@ func NewNodeFirewallRuleFromJson(input []byte) (firewallRule NodeFirewallRule, e
 }
 
 func NewNodeFirewallRuleFromAPICall(ctx context.Context, node string, pos int, client *Client) (firewallRule *NodeFirewallRule, err error) {
-	retrievedFirewallRule, err := client.ReadNodeFirewallRule(ctx, node, pos)
+	retrievedFirewallRule, err := readNodeFirewallRule(ctx, node, pos, client)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +45,7 @@ func NewNodeFirewallRuleFromAPICall(ctx context.Context, node string, pos int, c
 }
 
 func ReadAllFirewallRulesFromAPICall(ctx context.Context, node string, client *Client) (firewallRules []NodeFirewallRule, err error) {
-	retrievedFirewallRules, err := client.ReadNodeFirewallRules(ctx, node)
+	retrievedFirewallRules, err := readNodeFirewallRules(ctx, node, client)
 	if err != nil {
 		return nil, err
 	}
@@ -58,15 +60,64 @@ func ReadAllFirewallRulesFromAPICall(ctx context.Context, node string, client *C
 }
 
 func (nodeFirewallRule NodeFirewallRule) DeleteFirewallRule(ctx context.Context, node string, client *Client) error {
-	return client.DeleteNodeFirewallRule(ctx, node, nodeFirewallRule.Pos)
+	if client == nil {
+		return errors.New(Client_Error_Nil)
+	}
+	err := client.Delete(ctx, fmt.Sprintf("/nodes/%s/firewall/rules/%d", node, nodeFirewallRule.Pos))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (nodeFirewallRule NodeFirewallRule) CreateFirewallRule(ctx context.Context, node string, client *Client) error {
-	return client.CreateNodeFirewallRule(ctx, node, nodeFirewallRule.mapToApiValues())
+	if client == nil {
+		return errors.New(Client_Error_Nil)
+	}
+	err := client.Post(ctx, nodeFirewallRule.mapToApiValues(), fmt.Sprintf("/nodes/%s/firewall/rules", node))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (nodeFirewallRule NodeFirewallRule) UpdateFirewallRule(ctx context.Context, node string, client *Client) error {
-	return client.UpdateNodeFirewallRule(ctx, node, nodeFirewallRule.Pos, nodeFirewallRule.mapToApiValues())
+	if client == nil {
+		return errors.New(Client_Error_Nil)
+	}
+	err := client.Put(ctx, nodeFirewallRule.mapToApiValues(), fmt.Sprintf("/nodes/%s/firewall/rules/%d", node, nodeFirewallRule.Pos))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func readNodeFirewallRules(ctx context.Context, node string, client *Client) ([]interface{}, error) {
+	if client == nil {
+		return nil, errors.New(Client_Error_Nil)
+	}
+	rules, err := client.GetItemConfigInterfaceArray(ctx,
+		fmt.Sprintf("/nodes/%s/firewall/rules", node),
+		"node firewall",
+		"rules")
+	if err != nil {
+		return nil, err
+	}
+	return rules, nil
+}
+
+func readNodeFirewallRule(ctx context.Context, node string, pos int, client *Client) (map[string]interface{}, error) {
+	if client == nil {
+		return nil, errors.New(Client_Error_Nil)
+	}
+	rules, err := client.GetItemConfigMapStringInterface(ctx,
+		fmt.Sprintf("/nodes/%s/firewall/rules/%d", node, pos),
+		"node firewall",
+		fmt.Sprintf("rule on position: %d", pos))
+	if err != nil {
+		return nil, err
+	}
+	return rules, nil
 }
 
 func mapToNodeFirewallRule(input map[string]interface{}) *NodeFirewallRule {

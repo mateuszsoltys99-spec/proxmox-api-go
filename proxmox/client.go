@@ -2511,6 +2511,33 @@ func (c *Client) DeleteNodeFirewallRule(ctx context.Context, node string, pos in
 	return nil
 }
 
+// Reads firewall options from a node
+func (c *Client) ReadNodeFirewallOptions(ctx context.Context, node string) (map[string]interface{}, error) {
+	if c == nil {
+		return nil, errors.New(Client_Error_Nil)
+	}
+	rules, err := c.GetItemConfigMapStringInterface(ctx,
+		fmt.Sprintf("/nodes/%s/firewall/options", node),
+		"node firewall",
+		fmt.Sprintf("options for node: %s", node))
+	if err != nil {
+		return nil, err
+	}
+	return rules, nil
+}
+
+// Updates a firewall options on a node
+func (c *Client) UpdateNodeFirewallOptions(ctx context.Context, node string, params map[string]interface{}) error {
+	if c == nil {
+		return errors.New(Client_Error_Nil)
+	}
+	err := c.Put(ctx, params, fmt.Sprintf("/nodes/%s/firewall/options", node))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Returns the Client's cached version if it exists, otherwise fetches the version from the API.
 func (c *Client) Version(ctx context.Context) (Version, error) {
 	if c == nil {

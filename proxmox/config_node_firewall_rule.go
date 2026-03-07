@@ -13,10 +13,21 @@ type NodeFirewallRule struct {
 	Type   string `json:"type"`
 	Pos    int    `json:"pos,omitempty"`
 	Action string `json:"action"`
-	Sport  string `json:"sport,omitempty"`
+
+	Comment string `json:"comment,omitempty"`
+	Dest    string `json:"dest,omitempty"`
+	Dport   string `json:"dport,omitempty"`
+	Source  string `json:"source,omitempty"`
+	Sport   string `json:"sport,omitempty"`
+
+	IcmpType  string `json:"icmp-type,omitempty"`
+	Iface     string `json:"iface,omitempty"`
+	Ipversion int    `json:"ipversion,omitempty"`
+
+	Log   string `json:"log,omitempty"`
+	Macro string `json:"macro,omitempty"`
+
 	Digest string `json:"digest,omitempty"`
-	Log    string `json:"log,omitempty"`
-	Dport  string `json:"dport,omitempty"`
 	Enable int    `json:"enable,omitempty"`
 }
 
@@ -125,48 +136,99 @@ func mapToNodeFirewallRule(input map[string]interface{}) *NodeFirewallRule {
 	if _, isSet := input["proto"]; isSet {
 		proto = input["proto"].(string)
 	}
+
 	ruleType := ""
 	if _, isSet := input["type"]; isSet {
 		ruleType = input["type"].(string)
 	}
+
 	pos := 0
 	if _, isSet := input["pos"]; isSet {
 		pos = input["pos"].(int)
 	}
+
 	action := ""
 	if _, isSet := input["action"]; isSet {
 		action = input["action"].(string)
 	}
+
+	comment := ""
+	if _, isSet := input["comment"]; isSet {
+		comment = input["comment"].(string)
+	}
+
+	dest := ""
+	if _, isSet := input["dest"]; isSet {
+		dest = input["dest"].(string)
+	}
+
+	source := ""
+	if _, isSet := input["source"]; isSet {
+		source = input["source"].(string)
+	}
+
 	sport := ""
 	if _, isSet := input["sport"]; isSet {
 		sport = input["sport"].(string)
 	}
-	digest := ""
-	if _, isSet := input["digest"]; isSet {
-		digest = input["digest"].(string)
-	}
-	log := ""
-	if _, isSet := input["log"]; isSet {
-		log = input["log"].(string)
-	}
+
 	dport := ""
 	if _, isSet := input["dport"]; isSet {
 		dport = input["dport"].(string)
 	}
+
+	icmpType := ""
+	if _, isSet := input["icmp-type"]; isSet {
+		icmpType = input["icmp-type"].(string)
+	}
+
+	iface := ""
+	if _, isSet := input["iface"]; isSet {
+		iface = input["iface"].(string)
+	}
+
+	ipversion := 0
+	if _, isSet := input["ipversion"]; isSet {
+		ipversion = input["ipversion"].(int)
+	}
+
+	log := ""
+	if _, isSet := input["log"]; isSet {
+		log = input["log"].(string)
+	}
+
+	macro := ""
+	if _, isSet := input["macro"]; isSet {
+		macro = input["macro"].(string)
+	}
+
+	digest := ""
+	if _, isSet := input["digest"]; isSet {
+		digest = input["digest"].(string)
+	}
+
 	enable := 0
 	if _, isSet := input["enable"]; isSet {
 		enable = input["enable"].(int)
 	}
+
 	return &NodeFirewallRule{
-		Proto:  proto,
-		Type:   ruleType,
-		Pos:    pos,
-		Action: action,
-		Sport:  sport,
-		Digest: digest,
-		Log:    log,
-		Dport:  dport,
-		Enable: enable,
+		Proto:     proto,
+		Type:      ruleType,
+		Pos:       pos,
+		Action:    action,
+		Comment:   comment,
+		Dest:      dest,
+		Source:    source,
+		Sport:     sport,
+		Dport:     dport,
+		IcmpType:  icmpType,
+		Iface:     iface,
+		Ipversion: ipversion,
+		Log:       log,
+		Macro:     macro,
+		Digest:    digest,
+		Enable:    enable,
 	}
 }
 
